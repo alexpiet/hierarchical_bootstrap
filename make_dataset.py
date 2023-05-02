@@ -17,7 +17,7 @@ def demonstration_1():
     # Plot the bootstraps
     plot_data(df1,bootstraps)
   
-def demonstration(group_diff = .1,nboots=1000,seed=1):
+def demonstration(group_diff = 0,nboots=1000,seed=1):
     np.random.seed(seed)
     # Make a synthetic dataset with two overall groups 
     df = make_two_group_data(group_diff=group_diff)
@@ -73,7 +73,7 @@ def make_data(n=[10,10,10]):
     return df
 
 def plot_data(df,bootstraps):
-    plt.figure()
+    plt.figure(figsize=(5,3))
     
     num_groups = len(bootstraps['groups'])
    
@@ -99,7 +99,7 @@ def plot_data(df,bootstraps):
         plt.plot([3]*len(df),df['response'],'o')
     
         plt.ylabel('value',fontsize=16)
-        plt.xticks([0,1,2,3],labels=['mean','level 1','level 2','level 3'],fontsize=12)
+        plt.xticks([0,1,2,3],labels=['mean','level 1','level 2','response'],fontsize=12)
     else:
         colors = ['k','m','r','b']
         dx = .1
@@ -131,6 +131,7 @@ def plot_data(df,bootstraps):
     ax = plt.gca()
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
+    plt.tight_layout()
 
 def plot_stats_demonstration(df,bootstraps, stats_df):
     colors = ['k','m']

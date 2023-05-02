@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import hierarchical_bootstrap.bootstrap as hb
 import hierarchical_bootstrap.stats as stats
 
-def demonstration():
+def demonstration_1():
 
     # Make a synthetic dataset with one overall group (no "top level"), and hierarchical
     # levels "level_1" and "level_2", and the metric of interest "response"
@@ -17,7 +17,7 @@ def demonstration():
     # Plot the bootstraps
     plot_data(df1,bootstraps)
   
-def demonstration_2(group_diff = 1,nboots=100,seed=1):
+def demonstration(group_diff = .1,nboots=1000,seed=1):
     np.random.seed(seed)
     # Make a synthetic dataset with two overall groups 
     df = make_two_group_data(group_diff=group_diff)

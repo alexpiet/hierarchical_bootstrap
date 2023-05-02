@@ -1,8 +1,20 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from collections import Counter
 
-def bootstrap(df,metric='response', top_level=None, levels=['level_1','level_2'],nboots=100):
+def bootstrap(df,metric='response', top_level=None, levels=['level_1','level_2'],
+    nboots=100,version='1'):   
+
+    if version == '1':
+        return bootstrap_v1(df,metric,top_level,levels,nboots)
+    elif version == '2':
+        return bootstrap_v2(df,metric,top_level,levels,nboots)
+    else:
+        print('unknown version')   
+
+###############################################################################
+def bootstrap_v1(df,metric='response', top_level=None, levels=['level_1','level_2'],nboots=100):
     '''
         Computes a hierarchical bootstrap of <metric> across the hierarchy
         defined in <levels>. 
@@ -65,4 +77,63 @@ def sample_hierarchically(df, metric, levels):
             count += temp_count
         return sum_val, count
 
+###############################################################################
+def bootstrap_v2(df,metric='response', top_level=None, levels=['level_1','level_2'],nboots=100):
+    '''
+        Computes a hierarchical bootstrap of <metric> across the hierarchy
+        defined in <levels>. 
+        levels, strings referring to columns in 'df' from highest (coarsest) level to lowest (finest)
+        top_level splits the data into multiple groups and performs a bootstrap for each group
+    '''
 
+    if top_level is None:
+        summary = {}
+        summary[metric] = []
+        # Perform each bootstrap
+        for i in tqdm(range(0,nboots),desc=metric):
+            sum_val, count = sample_hierarchically_v2(df, metric, levels,1)
+            summary[metric].append(sum_val/count)                        
+         
+    else:
+        print('warning, using v1')
+        summary = {}
+        groups = df[top_level].unique()
+        # Iterate over top level groups
+        for g in groups:
+            summary[g]= []
+            temp = df.query('{} == @g'.format(top_level))
+    
+            # Perform each bootstrap
+            for i in tqdm(range(0,nboots),desc=g):
+                sum_val, count = sample_hierarchically(temp, metric, levels)
+                summary[g].append(sum_val/count)            
+    groups = list(summary.keys())
+    
+    # Compute SEM for each group by taking standard deviation of bootstrapped means 
+    for key in groups:
+        summary[key+'_sem'] = np.std(summary[key])
+    summary['groups'] = groups
+    return summary
+
+def sample_hierarchically_v2(df,metric,levels,num_samples=1):
+    if len(levels) == 1:
+        # At the bottom level
+        sum_val = df[metric].sample(n=len(df)*num_samples,replace=True).sum()
+        count = len(df)*num_samples
+        return sum_val, count  
+    else:
+        # Sample with replacement an equal number of times to how many
+        # data points we have at this level
+        items = df[levels[0]].unique()     
+        n = len(items)
+        sum_val = 0
+        count = 0
+        samples = Counter(np.random.choice(items,size=n*num_samples))
+        for sample in samples.keys():
+            temp = df.query('{} == @sample'.format(levels[0]))
+            temp_sum_val, temp_count = \
+                sample_hierarchically_v2(temp, metric, levels[1:],samples[sample])
+            sum_val +=temp_sum_val
+            count += temp_count
+        return sum_val, count
+   

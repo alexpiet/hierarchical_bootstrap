@@ -4,7 +4,7 @@ from tqdm import tqdm
 from collections import Counter
 
 def bootstrap(df,metric='response', top_level=None, levels=['level_1','level_2'],
-    nboots=100,version='1'):   
+    nboots=100,version='3'):   
 
     if version == '1':
         return bootstrap_v1(df,metric,top_level,levels,nboots)
@@ -22,6 +22,8 @@ def bootstrap_v1(df,metric='response', top_level=None, levels=['level_1','level_
         defined in <levels>. 
         levels, strings referring to columns in 'df' from highest (coarsest) level to lowest (finest)
         top_level splits the data into multiple groups and performs a bootstrap for each group
+
+        DEVELOPMENT VERSION. DO NOT USE
     '''
 
     if top_level is None:
@@ -86,6 +88,10 @@ def bootstrap_v2(df,metric='response', top_level=None, levels=['level_1','level_
         defined in <levels>. 
         levels, strings referring to columns in 'df' from highest (coarsest) level to lowest (finest)
         top_level splits the data into multiple groups and performs a bootstrap for each group
+    
+        DEVELOPMENT VERSION, DO NOT USE.
+        Faster than v1 because we figure out how many times we need to sample each lower-level,
+            which cuts down the number of queries we need to do
     '''
 
     if top_level is None:
@@ -145,6 +151,8 @@ def bootstrap_v3(df,metric='response', top_level=None, levels=['level_1','level_
         defined in <levels>. 
         levels, strings referring to columns in 'df' from highest (coarsest) level to lowest (finest)
         top_level splits the data into multiple groups and performs a bootstrap for each group
+    
+        Faster than version 2 because it uses df[ ] syntax instead of df.query()
     '''
 
     if top_level is None:
@@ -190,7 +198,6 @@ def sample_hierarchically_v3(df,metric,levels,num_samples=1):
         count = 0
         samples = Counter(np.random.choice(items,size=n*num_samples))
         for sample in samples.keys():
-            #temp = df.query('{} == @sample'.format(levels[0]))
             temp = df[df[levels[0]].values == sample]
             temp_sum_val, temp_count = \
                 sample_hierarchically_v3(temp, metric, levels[1:],samples[sample])

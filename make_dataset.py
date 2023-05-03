@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import hierarchical_bootstrap.bootstrap as hb
 import hierarchical_bootstrap.stats as stats
 
+'''
+    Just functions for demonstrating how the method works 
+'''
+
 def demonstration_1():
 
     # Make a synthetic dataset with one overall group (no "top level"), and hierarchical

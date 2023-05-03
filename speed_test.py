@@ -5,9 +5,15 @@ import matplotlib.pyplot as plt
 import hierarchical_bootstrap.bootstrap as hb
 import hierarchical_bootstrap.make_dataset as md
 
+'''
+   Development functions for comparing implementations 
+'''
 
 def run_test(version,n,nboots):
-    
+    '''
+        Compute bootstraps for a single version, data structure, and nboots
+    '''    
+
     df = md.make_data(n=n)
     start = time.time()
     bootstraps = hb.bootstrap(df,levels=['level_1','level_2'],nboots=nboots,version=version)
@@ -44,12 +50,20 @@ def test_n(version,nboots=100):
     return pd.DataFrame(tests)
 
 def check_versions(versions=['1','2'],nboots=100):
+    '''
+        Quick sanity check that the implementations agree by comparing the quantiles of the
+        bootstrapped samples
+    '''
+    # Make dataset
     df = md.make_data()
+    
+    # Perform bootstraps
     x1 = hb.bootstrap(df,nboots=nboots,version=versions[0])
     x2 = hb.bootstrap(df,nboots=nboots,version=versions[1])
     x = np.sort(x1['response'])
     y = np.sort(x2['response'])
 
+    # Plot quantile-quantile plot
     fig,ax = plt.subplots()
     quantiles = np.linspace(start=0,stop=1,num=int(np.round(nboots/20)))
     x_quantiles = np.nanquantile(x,quantiles, interpolation='linear')[1:-1]

@@ -5,6 +5,19 @@ from collections import Counter
 
 def bootstrap(df,metric='response', top_level=None, levels=['level_1','level_2'],
     nboots=100,version='3'):   
+    '''
+        Wrapper function that selects which implementation to use. 
+
+        df, a pandas dataframe in the tidy format, with columns <metric>, <levels>, 
+            and <top_level> if not None
+        metric, the name of the column with the observation variable of interest
+        top_level, (optional) the name of the column that defines a top-level 
+            experimental manipulation
+        levels, a list of column names that define the hierarchical structure of the dataset
+            the first entry is the coarsest level
+        nboots, int, how many bootstrap iterations to perform
+        version, str, which implementation version to use. '3' is the fastest at the moment. 
+    '''
 
     if version == '1':
         return bootstrap_v1(df,metric,top_level,levels,nboots)
@@ -16,7 +29,8 @@ def bootstrap(df,metric='response', top_level=None, levels=['level_1','level_2']
         print('unknown version')   
 
 ###############################################################################
-def bootstrap_v1(df,metric='response', top_level=None, levels=['level_1','level_2'],nboots=100):
+def bootstrap_v1(df,metric='response', top_level=None, 
+    levels=['level_1','level_2'],nboots=100):
     '''
         Computes a hierarchical bootstrap of <metric> across the hierarchy
         defined in <levels>. 
@@ -82,7 +96,8 @@ def sample_hierarchically(df, metric, levels):
         return sum_val, count
 
 ###############################################################################
-def bootstrap_v2(df,metric='response', top_level=None, levels=['level_1','level_2'],nboots=100):
+def bootstrap_v2(df,metric='response', top_level=None, 
+    levels=['level_1','level_2'],nboots=100):
     '''
         Computes a hierarchical bootstrap of <metric> across the hierarchy
         defined in <levels>. 
@@ -145,7 +160,8 @@ def sample_hierarchically_v2(df,metric,levels,num_samples=1):
         return sum_val, count
   
 ###############################################################################
-def bootstrap_v3(df,metric='response', top_level=None, levels=['level_1','level_2'],nboots=100):
+def bootstrap_v3(df,metric='response', top_level=None, 
+    levels=['level_1','level_2'],nboots=100):
     '''
         Computes a hierarchical bootstrap of <metric> across the hierarchy
         defined in <levels>. 
@@ -156,6 +172,7 @@ def bootstrap_v3(df,metric='response', top_level=None, levels=['level_1','level_
     '''
 
     if top_level is None:
+        # We don't have a top level, so make a group named <metric>
         summary = {}
         summary[metric] = []
         # Perform each bootstrap
@@ -164,44 +181,63 @@ def bootstrap_v3(df,metric='response', top_level=None, levels=['level_1','level_
             summary[metric].append(sum_val/count)                        
          
     else:
+        # We have a top level, so determine how many groups there are
         summary = {}
         groups = df[top_level].unique()
+
         # Iterate over top level groups
         for g in groups:
             summary[g]= []
+            # Filter the data frame to just this group
             temp = df.query('{} == @g'.format(top_level))
     
             # Perform each bootstrap
             for i in tqdm(range(0,nboots),desc=g):
-                sum_val, count = sample_hierarchically_v3(temp, metric, levels)
-                summary[g].append(sum_val/count)            
+                sum_val, count = sample_hierarchically_v3(temp, metric, levels,1)
+                summary[g].append(sum_val/count)      
+
+    # Determine how many groups we had      
     groups = list(summary.keys())
     
     # Compute SEM for each group by taking standard deviation of bootstrapped means 
     for key in groups:
         summary[key+'_sem'] = np.std(summary[key])
     summary['groups'] = groups
+
+    # Return summary dictionary
     return summary
 
 def sample_hierarchically_v3(df,metric,levels,num_samples=1):
+    '''
+        num_samples, int, how many times to sample this level of the hierarchy
+    '''
     if len(levels) == 1:
-        # At the bottom level
+        # At the bottom level, just sample the rows
         sum_val = df[metric].sample(n=len(df)*num_samples,replace=True).sum()
         count = len(df)*num_samples
         return sum_val, count  
     else:
         # Sample with replacement an equal number of times to how many
-        # data points we have at this level
+        # data points we have at this level, multiplied by how many times we are sampling
+        # this level
         items = df[levels[0]].unique()     
-        n = len(items)
+        samples = Counter(np.random.choice(items,size=len(items)*num_samples))
+
+        # Iterate through each sample and recursively compute the bootstrap
         sum_val = 0
         count = 0
-        samples = Counter(np.random.choice(items,size=n*num_samples))
         for sample in samples.keys():
+    
+            # Filter the dataset for this sample
             temp = df[df[levels[0]].values == sample]
+        
+            # Recursively compute bootstrap
             temp_sum_val, temp_count = \
                 sample_hierarchically_v3(temp, metric, levels[1:],samples[sample])
+
+            # Keep track of running sum and running number of datapoints
             sum_val +=temp_sum_val
             count += temp_count
+            
         return sum_val, count
  

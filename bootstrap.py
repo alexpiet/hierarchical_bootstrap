@@ -101,7 +101,7 @@ def sample_hierarchically(df, metric, levels):
         For efficiency, we return the running total and number of samples
         instead of the list of actual values
     '''
-    if len(levels) == 1:
+    if len(levels) == 0:
         # At the bottom level
         sum_val = df[metric].sample(n=len(df),replace=True).sum()
         count = len(df)
@@ -165,7 +165,7 @@ def bootstrap_v2(df,metric='response', top_level=None,
     return summary
 
 def sample_hierarchically_v2(df,metric,levels,num_samples=1):
-    if len(levels) == 1:
+    if len(levels) == 0:
         # At the bottom level
         sum_val = df[metric].sample(n=len(df)*num_samples,replace=True).sum()
         count = len(df)*num_samples

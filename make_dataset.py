@@ -16,7 +16,7 @@ def demonstration_1():
     df1 = make_data()
 
     # Compute the bootstraps
-    bootstraps = hb.bootstrap(df1,levels=['level_1','level_2'],nboots=100)
+    bootstraps = hb.bootstrap(df1,levels=['level_1'],nboots=100)
     
     # Plot the bootstraps
     plot_data(df1,bootstraps)
@@ -46,13 +46,8 @@ def demonstrate_levels(group_diff = 0, nboots=1000,seed=1):
     stats_df2 = stats.compute_stats(bootstraps2)
     stats_df2 = stats.compute_naive_ttest(df,bootstraps2,stats_df2)
 
-    #bootstraps3 = hb.bootstrap(df,levels=['level_1','level_2','level_3'],top_level='group',
-    #    nboots=nboots)
-    #stats_df3 = stats.compute_stats(bootstraps3)
-    #stats_df3 = stats.compute_naive_ttest(df,bootstraps3,stats_df3)
-
-    bootstraps = [bootstraps1,bootstraps2]#,bootstraps3]
-    stats_df = [stats_df1,stats_df2]#,stats_df3]
+    bootstraps = [bootstraps1,bootstraps2]
+    stats_df = [stats_df1,stats_df2]
     return df, bootstraps, stats_df
 
 

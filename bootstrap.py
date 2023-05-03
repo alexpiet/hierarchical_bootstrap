@@ -19,6 +19,33 @@ def bootstrap(df,metric='response', top_level=None, levels=['level_1','level_2']
         version, str, which implementation version to use. '3' is the fastest at the moment. 
     '''
 
+    ## Input checking
+    # Check all columns are present
+    if metric not in df.columns:
+        raise Exception('metric "{}" not found in dataframe'.format(metric))
+    if (top_level is not None) and (top_level not in df.columns):
+        raise Exception('top_level grouping "{}" not found in dataframe'.format(top_level))
+    for level in levels:
+        if level not in df.columns:
+            raise Exception('hierarchical level "{}" not found in dataframe'.format(level))
+
+    # Check all columns make sense
+    if metric in levels:
+        raise Exception('metric "{}" cannot be part of hierarchical levels'.format(metric))
+    if (top_level is not None) and (top_level in levels):
+        raise Exception('top_level grouping '+\
+            '"{} cannot be part of hierarchical levels'.format(metric))
+    if metric == top_level:
+        raise Exception('metric "{}" cannot be the same as the top_level grouping'.format(metric))
+
+    # Make sure data types make sense
+    if not pd.api.types.is_numeric_dtype(df[metric]):
+        raise Exception('metric "{}" must be a numerical data type'.format(metric))
+    if 'float64' in list(df[levels].dtypes.values.astype(str)):
+        raise Exception('hierarchical level "{}" must not be continuously valued'.format(level))
+
+    
+    ## Call the appropriate version
     if version == '1':
         return bootstrap_v1(df,metric,top_level,levels,nboots)
     elif version == '2':

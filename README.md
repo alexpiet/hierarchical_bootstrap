@@ -17,14 +17,27 @@ In this synthetic dataset there are two groups, colored black and mageneta. Each
 
 
 ![bootstraps_example](https://user-images.githubusercontent.com/7605170/235807446-a2c5d63d-22be-4573-8af2-090187af4527.png)
-![bootstraps_example_2](https://user-images.githubusercontent.com/7605170/235807445-93ebc010-ebe3-4665-8e34-6b04a57981d7.png)
+![bootstrap_levels](https://user-images.githubusercontent.com/7605170/236035325-40eac912-c4f8-40f0-9e74-f7efe992200c.png)
+
 
 ## General use
 
-Organize your data in the pandas "tidy" format, where each row is a single observation. Each level of the nested structure should be defined in a column, as well as any top level groups. The observation variable should be its own column. For example if we have a dataframe of observations "response" and nested hierarchies "level_1" and "level_2", then we can compute the bootstraps as:
+Organize your data in the pandas "tidy" format, where each row is a single observation. Each level of the nested structure should be defined in a column, as well as any top level groups. The observation variable should be its own column. For example if we have a dataframe of observations "response" and nested hierarchies "level_1" and "level_2", then we can compute the bootstraps with different levels of hierachical bootstrapping. To compute non-hierarchical bootstraps, which is just sampling with replacement from all observations, regardless of hierarchy (sample once):
+
+> import hierarchical_bootstrap.bootstrap as hb   
+> bootstraps = hb.bootstrap(df, metric='response',levels=[], nboots=10000)
+
+To sample with one level of hierarchy, which means we sample with replacement from elements of "level_1", then sample with replacement from all observations within that element of level_1 (sample twice).
+
+> import hierarchical_bootstrap.bootstrap as hb   
+> bootstraps = hb.bootstrap(df, metric='response',levels=['level_1'], nboots=10000)
+
+To sample with two levels of the hierarchy, which means we sample with replacement from elements of "level_1", then sample with replacement from "level_2" elements within that element of level_1, then finally sample from all observations within that level_1, level_2 element (sample three times).
 
 > import hierarchical_bootstrap.bootstrap as hb   
 > bootstraps = hb.bootstrap(df, metric='response',levels=['level_1','level_2'], nboots=10000)
+
+How many nesting steps you should take depends on the variance at each level of your dataset. The code should work for as many levels as you want, but performance will suffer greatly from each additional level. 
 
 The output variable is a dictionary with three keys. The first <metric> is a list of the bootstrap samples, so a list of length <nboots>. The second <metric>_sem is the estimated hierarchical standard error of the mean, which is computed simply as the standard deviation of the bootstrap samples. The last "groups" is a list of top-level groups, which for this simple case if just length 1. 
 

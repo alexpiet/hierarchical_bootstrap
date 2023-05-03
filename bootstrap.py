@@ -95,7 +95,7 @@ def bootstrap_v1(df,metric='response', top_level=None,
     summary['groups'] = groups
     return summary
 
-def sample_hierarchically(df, metric, levels):
+def sample_hierarchically(df, metric, levels): 
     '''
         Sample the levels of the hierarchy and return the mean.
         For efficiency, we return the running total and number of samples
@@ -238,7 +238,7 @@ def sample_hierarchically_v3(df,metric,levels,num_samples=1):
     '''
         num_samples, int, how many times to sample this level of the hierarchy
     '''
-    if len(levels) == 1:
+    if len(levels) == 0:
         # At the bottom level, just sample the rows
         sum_val = df[metric].sample(n=len(df)*num_samples,replace=True).sum()
         count = len(df)*num_samples

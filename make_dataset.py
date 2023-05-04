@@ -33,10 +33,14 @@ def demonstration(group_diff = 0,nboots=1000,seed=1):
     print(stats_df)
     return df, bootstraps, stats_df
 
-def demonstrate_levels(group_diff = 0, nboots=1000,seed=1): 
+def demonstrate_levels(group_diff = 0, nboots=1000,seed=1,level_1_var=1,level_2_var=1,level_3_var=1): 
     np.random.seed(seed)
     # Make a synthetic dataset with two overall groups 
-    df = make_two_group_data(group_diff=group_diff)
+    df = make_two_group_data(
+        group_diff=group_diff,
+        level_1_var=level_1_var,
+        level_2_var=level_2_var,
+        level_3_var=level_3_var)
 
     bootstraps1 = hb.bootstrap(df,levels=['level_1'],top_level='group',nboots=nboots)
     stats_df1 = stats.compute_stats(bootstraps1)
@@ -51,23 +55,24 @@ def demonstrate_levels(group_diff = 0, nboots=1000,seed=1):
     return df, bootstraps, stats_df
 
 
-def make_two_group_data(n=[10,10,10],group_diff = 1):
-    df1 = make_data(n=n)
+def make_two_group_data(n=[10,10,10],group_diff = 1,level_1_var=1,level_2_var=1,level_3_var=1):
+    df1 = make_data(n=n, level_1_var=level_1_var,
+        level_2_var=level_2_var,
+        level_3_var=level_3_var)
     df1['group'] = 'group_1'
-    df2 = make_data(n=n)
+    df2 = make_data(n=n,level_1_var=level_1_var,
+        level_2_var=level_2_var,
+        level_3_var=level_3_var)
     df2['group'] = 'group_2'
     df2['response'] = df2['response'] + group_diff
     df = pd.concat([df1,df2])
     return df
     
-def make_data(n=[10,10,10]):
+def make_data(n=[10,10,10],level_1_var=1,level_2_var=1,level_3_var=1):
     '''
         Generates synthetic data with groups, subjects, cells, and image level sampling
     '''
 
-    level_1_var = 1
-    level_2_var = 1
-    level_3_var = 1
     dfs = []
 
     # Iterate over experiments

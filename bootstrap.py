@@ -338,16 +338,15 @@ def sample_hierarchically_v4(df,metric,levels,num_samples=[1],nboots=1):
     else:
         # Sample with replacement an equal number of times to how many
         # data points we have at this level, multiplied by how many times we are sampling
-        # this level
-        items = df[levels[0]].unique()    
-        
+        # this level. We do this for each bootstrap
+        items = df[levels[0]].unique()     
         samples = np.zeros((len(items),nboots))
         for i in range(0,nboots): 
             count = Counter(np.random.choice(items,size=len(items)*int(num_samples[i])))
             for index,item in enumerate(items):
                 samples[index,i]=count[item]
 
-        # Iterate through each sample and recursively compute the bootstrap
+        # Iterate through each sample and recursively compute the bootstraps
         sums = np.zeros(nboots)
         counts = np.zeros(nboots)
         for index,item in enumerate(items):
@@ -355,7 +354,7 @@ def sample_hierarchically_v4(df,metric,levels,num_samples=[1],nboots=1):
             # Filter the dataset for this sample
             temp = df[df[levels[0]].values == item]
         
-            # Recursively compute bootstrap
+            # Recursively compute an array of bootstrap values for this sample
             temp_sums, temp_counts = \
                 sample_hierarchically_v4(temp, metric, levels[1:],samples[index,:],nboots)
 

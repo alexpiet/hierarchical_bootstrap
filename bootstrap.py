@@ -3,8 +3,8 @@ import pandas as pd
 from tqdm import tqdm
 from collections import Counter
 
-def bootstrap(df,metric='response', top_level=None, levels=['level_1','level_2'],
-    nboots=100,version='3'):   
+def bootstrap(df,metric='response', top_level=None, levels=['level_1'],
+    nboots=100,version='4'):   
     '''
         Wrapper function that selects which implementation to use. 
 
@@ -16,7 +16,7 @@ def bootstrap(df,metric='response', top_level=None, levels=['level_1','level_2']
         levels, a list of column names that define the hierarchical structure of the dataset
             the first entry is the coarsest level
         nboots, int, how many bootstrap iterations to perform
-        version, str, which implementation version to use. '3' is the fastest at the moment. 
+        version, str, which implementation version to use. '4' is the fastest at the moment. 
     '''
 
     ## Input checking
@@ -52,6 +52,8 @@ def bootstrap(df,metric='response', top_level=None, levels=['level_1','level_2']
         return bootstrap_v2(df,metric,top_level,levels,nboots)
     elif version == '3':
         return bootstrap_v3(df,metric,top_level,levels,nboots)
+    elif version == '4':
+        return bootstrap_v4(df,metric,top_level,levels,nboots)
     else:
         print('unknown version')   
 
@@ -267,4 +269,101 @@ def sample_hierarchically_v3(df,metric,levels,num_samples=1):
             count += temp_count
             
         return sum_val, count
- 
+
+
+###############################################################################
+def bootstrap_v4(df,metric='response', top_level=None, 
+    levels=['level_1','level_2'],nboots=100):
+    '''
+        Computes a hierarchical bootstrap of <metric> across the hierarchy
+        defined in <levels>. 
+        levels, strings referring to columns in 'df' from highest (coarsest) level to lowest (finest)
+        top_level splits the data into multiple groups and performs a bootstrap for each group
+    
+        Faster than version 3 because it computes all the bootstraps in parallel which means
+            you only need to perform each query a single time
+            (About 4x faster than v3, and 20x faster than v1)
+    '''
+
+    if top_level is None:
+        # We don't have a top level, so make a group named <metric>
+        summary = {}
+        summary[metric] = []
+
+        # Perform each bootstrap
+        sums, count = sample_hierarchically_v4(df,metric,levels,[1]*nboots,nboots)
+        summary[metric] = sums/count
+         
+    else:
+        # We have a top level, so determine how many groups there are
+        summary = {}
+        groups = df[top_level].unique()
+
+        # Iterate over top level groups
+        for g in groups:
+            summary[g]= []
+            # Filter the data frame to just this group
+            temp = df.query('{} == @g'.format(top_level))
+
+            sums, count = sample_hierarchically_v4(temp,metric,levels,[1]*nboots,nboots)
+            summary[group] = sums/count   
+
+    # Determine how many groups we had      
+    groups = list(summary.keys())
+    
+    # Compute SEM for each group by taking standard deviation of bootstrapped means 
+    for key in groups:
+        summary[key+'_sem'] = np.std(summary[key])
+    summary['groups'] = groups
+
+    # Return summary dictionary
+    return summary
+
+def sample_hierarchically_v4(df,metric,levels,num_samples=[1],nboots=1):
+    '''
+        num_samples, int, how many times to sample this level of the hierarchy
+    '''
+    if len(num_samples) != nboots:
+        raise Exception('bad input size')
+    
+    if len(levels) == 0:
+        # At the bottom level, just sample the rows
+        sums = np.zeros(nboots)
+        counts = np.zeros(nboots)
+        for i in range(0,nboots):
+            if num_samples[i] > 0:
+                sums[i] = df[metric].sample(n=len(df)*int(num_samples[i]),replace=True).sum()
+                counts[i] = len(df)*num_samples[i]
+        return sums, counts  
+    else:
+        # Sample with replacement an equal number of times to how many
+        # data points we have at this level, multiplied by how many times we are sampling
+        # this level
+        items = df[levels[0]].unique()    
+        
+        samples = np.zeros((len(items),nboots))
+        for i in range(0,nboots): 
+            count = Counter(np.random.choice(items,size=len(items)*int(num_samples[i])))
+            for index,item in enumerate(items):
+                samples[index,i]=count[item]
+
+        # Iterate through each sample and recursively compute the bootstrap
+        sums = np.zeros(nboots)
+        counts = np.zeros(nboots)
+        for index,item in enumerate(items):
+    
+            # Filter the dataset for this sample
+            temp = df[df[levels[0]].values == item]
+        
+            # Recursively compute bootstrap
+            temp_sums, temp_counts = \
+                sample_hierarchically_v4(temp, metric, levels[1:],samples[index,:],nboots)
+
+            # Keep track of running sum and running number of datapoints
+            sums = sums + temp_sums
+            counts = counts + temp_counts
+            
+        return sums, counts
+
+
+

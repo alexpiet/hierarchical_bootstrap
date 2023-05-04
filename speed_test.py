@@ -9,14 +9,14 @@ import hierarchical_bootstrap.make_dataset as md
    Development functions for comparing implementations 
 '''
 
-def run_test(version,n,nboots):
+def run_test(version,n,nboots,levels=['level_1']):
     '''
         Compute bootstraps for a single version, data structure, and nboots
     '''    
 
     df = md.make_data(n=n)
     start = time.time()
-    bootstraps = hb.bootstrap(df,levels=['level_1','level_2'],nboots=nboots,version=version)
+    bootstraps = hb.bootstrap(df,levels=levels,nboots=nboots,version=version)
     end = time.time()
     duration = end-start
 
@@ -32,24 +32,24 @@ def run_test(version,n,nboots):
     test['time/branching'] = test['duration']/n[0]
     return test
     
-def test_nboots(version,n,nboots=[10,100,1000]):
+def test_nboots(version,n,nboots=[10,100,1000],levels=['level_1']):
     '''
         Scale linearly with number of bootstraps
     '''
     tests = []
     for nboot in nboots:
-        tests.append(run_test(version,n,nboot))
+        tests.append(run_test(version,n,nboot,levels=levels))
     
     return pd.DataFrame(tests)
 
-def test_n(version,nboots=100):
+def test_n(version,nboots=100,levels=['level_1']):
     ns = [[10,10,10],[20,20,20],[30,30,30]]
     tests = []
     for n in ns:
-        tests.append(run_test(version,n,nboots))
+        tests.append(run_test(version,n,nboots,levels=levels))
     return pd.DataFrame(tests)
 
-def check_versions(versions=['1','2'],nboots=100):
+def check_versions(versions=['1','2'],nboots=100,levels=['level_1']):
     '''
         Quick sanity check that the implementations agree by comparing the quantiles of the
         bootstrapped samples
@@ -58,8 +58,8 @@ def check_versions(versions=['1','2'],nboots=100):
     df = md.make_data()
     
     # Perform bootstraps
-    x1 = hb.bootstrap(df,nboots=nboots,version=versions[0])
-    x2 = hb.bootstrap(df,nboots=nboots,version=versions[1])
+    x1 = hb.bootstrap(df,nboots=nboots,version=versions[0],levels=levels)
+    x2 = hb.bootstrap(df,nboots=nboots,version=versions[1],levels=levels)
     x = np.sort(x1['response'])
     y = np.sort(x2['response'])
 

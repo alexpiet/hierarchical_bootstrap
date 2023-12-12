@@ -10,6 +10,14 @@ Everything is generally applicable to any nested dataset, although my use case i
 
 Contact: alexpiet [at] gmail [dot] com 
 
+## Installation
+
+I recommend installing within a conda environment.
+
+> git clone https://github.com/alexpiet/hierarchical_bootstrap.git
+> cd hierarchical_bootstrap
+> pip install .
+
 ## Demonstration
 
 I developed a simple demonstration of why a hierarchical approach is important when data is nested. The demonstration function will generate synthetic data with a nested structure. Importantly, there is no difference between the generative means of the two processes, but the variability at the two levels of the nested data means that a naive t-test will return a signficant result, while a hierarchical approach will show no effect. 

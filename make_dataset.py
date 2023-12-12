@@ -8,18 +8,6 @@ import hierarchical_bootstrap.stats as stats
 '''
     Just functions for demonstrating how the method works 
 '''
-
-def demonstration_1():
-
-    # Make a synthetic dataset with one overall group (no "top level"), and hierarchical
-    # levels "level_1" and "level_2", and the metric of interest "response"
-    df1 = make_data()
-
-    # Compute the bootstraps
-    bootstraps = hb.bootstrap(df1,levels=['level_1'],nboots=100)
-    
-    # Plot the bootstraps
-    plot_data(df1,bootstraps)
   
 def demonstration(group_diff = 0,nboots=1000,seed=1):
     np.random.seed(seed)
@@ -32,6 +20,7 @@ def demonstration(group_diff = 0,nboots=1000,seed=1):
     plot_stats_demonstration(df,bootstraps,stats_df)
     print(stats_df)
     return df, bootstraps, stats_df
+
 
 def demonstrate_levels(group_diff = 0, nboots=1000,seed=1,level_1_var=1,level_2_var=1,level_3_var=1): 
     np.random.seed(seed)
@@ -52,6 +41,12 @@ def demonstrate_levels(group_diff = 0, nboots=1000,seed=1,level_1_var=1,level_2_
 
     bootstraps = [bootstraps1,bootstraps2]
     stats_df = [stats_df1,stats_df2]
+
+    plot_level_demonstration(df,bootstraps,stats_df)
+    print('Sampling just level 1')
+    print(stats_df1)
+    print('Sampling level 1 and 2')
+    print(stats_df2)
     return df, bootstraps, stats_df
 
 
@@ -184,11 +179,6 @@ def plot_level_demonstration(df,bootstraps, stats_df):
         boot_sem = bootstraps[1][group+'_sem']
         plt.plot(2+index*dx,m,'o',color=colors[index])
         plt.plot([2+index*dx,2+index*dx],[m-boot_sem,m+boot_sem],'-',color=colors[index])
-
-        ## hierarchical approach
-        #boot_sem = bootstraps[2][group+'_sem']
-        #plt.plot(3+index*dx,m,'o',color=colors[index])
-        #plt.plot([3+index*dx,3+index*dx],[m-boot_sem,m+boot_sem],'-',color=colors[index])
 
 
     if stats_df[0].loc[0]['naive_pvalue'] < 0.05:

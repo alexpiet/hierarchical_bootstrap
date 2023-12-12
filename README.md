@@ -17,12 +17,13 @@ I developed a simple demonstration of why a hierarchical approach is important w
 In this synthetic dataset there are two groups, colored black and mageneta. Each group has a hierarchical structure. As a specific example we might consider the groups two be an experimental manipulation, and the levels as nested observations (Level 1 could be behavioral sessions, level 2 could be cells, and level 3 is each measurement from a single cell). 
 
 > import hierarchical_bootstrap.make_data as md   
-> df,bootstraps, stats_df = md.demonstration() 
+> df,bootstraps, stats_df = md.demonstrate_levels() 
 
 
 ![bootstraps_example](https://user-images.githubusercontent.com/7605170/235807446-a2c5d63d-22be-4573-8af2-090187af4527.png)
 ![bootstrap_levels](https://user-images.githubusercontent.com/7605170/236035325-40eac912-c4f8-40f0-9e74-f7efe992200c.png)
 
+A naive t-test results in a false positive, whereas the hierarchical sampling approach correctly finds no significant difference between the groups. 
 
 ## General use
 

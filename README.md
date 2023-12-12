@@ -1,6 +1,10 @@
 
 # hierarchical_bootstrap
-Hierarchical bootstrap for pandas dataframes. Everything is generally applicable to any nested dataset, although my use case is neuroscience specific. I made some simple attempts to speed up the implementation, but it is still time consuming. I followed the procedure outlined in: 
+Implementation of a hierarchical bootstrap for pandas dataframes. This package can be used to perform two useful things:
+ - Estimate the confidence interval that takes into account the hierarchical nature of the data
+ - Perform a statistical test to compare the mean value between two groups that have hierachical structure. 
+
+Everything is generally applicable to any nested dataset, although my use case is neuroscience specific. I made some simple attempts to speed up the implementation, but it is still time consuming. I followed the procedure outlined in: 
 
 > Application of the hierarchical bootstrap to multi-level data in neuroscience (2020). https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7906290/
 

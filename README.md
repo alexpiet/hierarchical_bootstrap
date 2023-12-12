@@ -36,9 +36,9 @@ For example if we have a dataframe of observations "response" and nested hierarc
 > bootstraps = hb.bootstrap(df, metric='response',levels=[], nboots=10000)
 
 `bootstraps` is a dictionary with:
-    - `<metric>` the sampled value of the observation metric for each bootstrap iteration, will have length of `nboots`
-    - `<metric>_sem` the estimated standard error of the mean of the observation metric, computed as the standard deviation of the bootstrapped samples. In this case this should be very close to `df['response'].sem()`
-    - `groups`, the list of top-levels groups, in this case just `['response']`
+ - `<metric>` the sampled value of the observation metric for each bootstrap iteration, will have length of `nboots`
+ - `<metric>_sem` the estimated standard error of the mean of the observation metric, computed as the standard deviation of the bootstrapped samples. In this case this should be very close to `df['response'].sem()`
+ - `groups`, the list of top-levels groups, in this case just `['response']`
 
 To sample with one level of hierarchy, which means we sample with replacement from elements of "level_1", then sample with replacement from all observations within that element of level_1 (sample twice). Note now that the estimated SEM differs significantly from the naive approach above. 
 

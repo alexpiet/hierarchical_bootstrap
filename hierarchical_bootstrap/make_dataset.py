@@ -42,6 +42,7 @@ def demonstrate_levels(group_diff = 0, nboots=1000,seed=1,level_1_var=1,level_2_
     bootstraps = [bootstraps1,bootstraps2]
     stats_df = [stats_df1,stats_df2]
 
+    plot_data(df,bootstraps1)
     plot_level_demonstration(df,bootstraps,stats_df)
     print('Sampling just level 1')
     print(stats_df1)

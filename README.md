@@ -14,9 +14,9 @@ Contact: alexpiet [at] gmail [dot] com
 
 I recommend installing within a conda environment.
 
-> git clone https://github.com/alexpiet/hierarchical_bootstrap.git
-> cd hierarchical_bootstrap
-> pip install .
+> git clone https://github.com/alexpiet/hierarchical_bootstrap.git  
+> cd hierarchical_bootstrap  
+> pip install .  
 
 ## Demonstration
 

@@ -306,7 +306,7 @@ def bootstrap_v4(df,metric='response', top_level=None,
             temp = df.query('{} == @g'.format(top_level))
 
             sums, count = sample_hierarchically_v4(temp,metric,levels,[1]*nboots,nboots)
-            summary[group] = sums/count   
+            summary[g] = sums/count   
 
     # Determine how many groups we had      
     groups = list(summary.keys())

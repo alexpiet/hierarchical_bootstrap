@@ -59,8 +59,8 @@ If you have multiple top-level manipulations you want to compare, then you can s
 > bootstraps = hb.bootstrap(df, metric='response',levels=['level_1','level_2'], top_level='group',nboots=10000) 
 
 Now `bootstraps` is a dictionary with two entries for each unique group:
-    - `<group label>` the sampled value of the observation metric for each bootstrap iteration, only for this group. This will have level `nboots`.
-    - `<group label>_sem` the estimatd standard error of the mean of the observation metric for this group. 
+ - `<group label>` the sampled value of the observation metric for each bootstrap iteration, only for this group. This will have level `nboots`.
+ - `<group label>_sem` the estimatd standard error of the mean of the observation metric for this group. 
 
 You can perform statistical testing with:
 

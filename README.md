@@ -48,12 +48,12 @@ For example if we have a dataframe of observations "response" and nested hierarc
  - `<metric>_sem` the estimated standard error of the mean of the observation metric, computed as the standard deviation of the bootstrapped samples. In this case this should be very close to `df['response'].sem()`
  - `groups`, the list of top-levels groups, in this case just `['response']`
 
-To sample with one level of hierarchy, which means we sample with replacement from elements of "level_1", then sample with replacement from all observations within that element of level_1 (sample twice). Note now that the estimated SEM differs significantly from the naive approach above. 
+To sample with one level of hierarchy, which means we sample with replacement from elements of "level_1", then sample with replacement from all observations within that element of level_1 but ignoring all structure below that (level_2, level_3). Note we are sampling twice here. Note now that the estimated SEM differs significantly from the naive approach above. 
 
 > import hierarchical_bootstrap.bootstrap as hb   
 > bootstraps = hb.bootstrap(df, metric='response',levels=['level_1'], nboots=10000)
 
-To sample with two levels of the hierarchy, which means we sample with replacement from elements of "level_1", then sample with replacement from "level_2" elements within that element of level_1, then finally sample from all observations within that level_1, level_2 element (sample three times).
+To sample with two levels of the hierarchy, which means we sample with replacement from elements of "level_1", then sample with replacement from "level_2" elements within that element of level_1, then finally sample from all observations within that level_1, level_2 element. Note we sample three times.
 
 > import hierarchical_bootstrap.bootstrap as hb   
 > bootstraps = hb.bootstrap(df, metric='response',levels=['level_1','level_2'], nboots=10000)

@@ -17,6 +17,7 @@ def bootstrap(df,metric='response', top_level=None, levels=['level_1'],
             the first entry is the coarsest level
         nboots, int, how many bootstrap iterations to perform
         version, str, which implementation version to use. '4' is the fastest at the moment. 
+            Unless you have a good reason, use '4'.
     '''
 
     ## Input checking
@@ -66,7 +67,7 @@ def bootstrap_v1(df,metric='response', top_level=None,
         levels, strings referring to columns in 'df' from highest (coarsest) level to lowest (finest)
         top_level splits the data into multiple groups and performs a bootstrap for each group
 
-        DEVELOPMENT VERSION. DO NOT USE
+        DEVELOPMENT VERSION. DO NOT USE unless you have a good reason
     '''
 
     if top_level is None:
@@ -102,6 +103,8 @@ def sample_hierarchically(df, metric, levels):
         Sample the levels of the hierarchy and return the mean.
         For efficiency, we return the running total and number of samples
         instead of the list of actual values
+
+        DEVELOPMENT VERSION. DO NOT USE unless you have a good reason
     '''
     if len(levels) == 0:
         # At the bottom level
@@ -133,7 +136,7 @@ def bootstrap_v2(df,metric='response', top_level=None,
         levels, strings referring to columns in 'df' from highest (coarsest) level to lowest (finest)
         top_level splits the data into multiple groups and performs a bootstrap for each group
     
-        DEVELOPMENT VERSION, DO NOT USE.
+        DEVELOPMENT VERSION. DO NOT USE unless you have a good reason
         Faster than v1 because we figure out how many times we need to sample each lower-level,
             which cuts down the number of queries we need to do
     '''
@@ -167,6 +170,9 @@ def bootstrap_v2(df,metric='response', top_level=None,
     return summary
 
 def sample_hierarchically_v2(df,metric,levels,num_samples=1):
+    '''
+    DEVELOPMENT VERSION. DO NOT USE unless you have a good reason
+    '''
     if len(levels) == 0:
         # At the bottom level
         sum_val = df[metric].sample(n=len(df)*num_samples,replace=True).sum()
@@ -198,6 +204,8 @@ def bootstrap_v3(df,metric='response', top_level=None,
         top_level splits the data into multiple groups and performs a bootstrap for each group
     
         Faster than version 2 because it uses df[ ] syntax instead of df.query()
+        
+        DEVELOPMENT VERSION. DO NOT USE unless you have a good reason
     '''
 
     if top_level is None:
@@ -239,6 +247,7 @@ def bootstrap_v3(df,metric='response', top_level=None,
 def sample_hierarchically_v3(df,metric,levels,num_samples=1):
     '''
         num_samples, int, how many times to sample this level of the hierarchy
+        DEVELOPMENT VERSION. DO NOT USE unless you have a good reason
     '''
     if len(levels) == 0:
         # At the bottom level, just sample the rows

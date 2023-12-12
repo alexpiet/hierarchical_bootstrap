@@ -1,7 +1,9 @@
-import pandas as pd
 import time
+
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+
 import hierarchical_bootstrap.bootstrap as hb
 import hierarchical_bootstrap.make_dataset as md
 

@@ -27,12 +27,20 @@ A naive t-test results in a false positive, whereas the hierarchical sampling ap
 
 ## General use
 
-Organize your data in the pandas "tidy" format, where each row is a single observation. Each level of the nested structure should be defined in a column, as well as any top level groups. The observation variable should be its own column. For example if we have a dataframe of observations "response" and nested hierarchies "level_1" and "level_2", then we can compute the bootstraps with different levels of hierachical bootstrapping. To compute non-hierarchical bootstraps, which is just sampling with replacement from all observations, regardless of hierarchy (sample once):
+Organize your data in the pandas "tidy" format, where each row is a single observation. Each level of the nested structure should be defined in a column, as well as any top level groups. The observation variable should be its own column. 
+
+### Estimating the standard error of the mean with nested data
+For example if we have a dataframe of observations "response" and nested hierarchies "level_1" and "level_2", then we can compute the bootstraps with different levels of hierachical bootstrapping. You can use the `df` variable from the demonstration script above to follow along these examples. To compute non-hierarchical bootstraps, which is just sampling with replacement from all observations, regardless of hierarchy (sample once):
 
 > import hierarchical_bootstrap.bootstrap as hb   
 > bootstraps = hb.bootstrap(df, metric='response',levels=[], nboots=10000)
 
-To sample with one level of hierarchy, which means we sample with replacement from elements of "level_1", then sample with replacement from all observations within that element of level_1 (sample twice).
+`bootstraps` is a dictionary with:
+    - `<metric>` the sampled value of the observation metric for each bootstrap iteration, will have length of `nboots`
+    - `<metric>_sem` the estimated standard error of the mean of the observation metric, computed as the standard deviation of the bootstrapped samples. In this case this should be very close to `df['response'].sem()`
+    - `groups`, the list of top-levels groups, in this case just `['response']`
+
+To sample with one level of hierarchy, which means we sample with replacement from elements of "level_1", then sample with replacement from all observations within that element of level_1 (sample twice). Note now that the estimated SEM differs significantly from the naive approach above. 
 
 > import hierarchical_bootstrap.bootstrap as hb   
 > bootstraps = hb.bootstrap(df, metric='response',levels=['level_1'], nboots=10000)
@@ -44,15 +52,25 @@ To sample with two levels of the hierarchy, which means we sample with replaceme
 
 How many nesting steps you should take depends on the variance at each level of your dataset. The code should work for as many levels as you want, but performance will suffer greatly from each additional level. 
 
-The output variable is a dictionary with three keys. The first <metric> is a list of the bootstrap samples, so a list of length <nboots>. The second <metric>_sem is the estimated hierarchical standard error of the mean, which is computed simply as the standard deviation of the bootstrap samples. The last "groups" is a list of top-level groups, which for this simple case if just length 1. 
+### Comparing groups and hypothesis testing
 
 If you have multiple top-level manipulations you want to compare, then you can specify that too:
 
 > bootstraps = hb.bootstrap(df, metric='response',levels=['level_1','level_2'], top_level='group',nboots=10000) 
 
+Now `bootstraps` is a dictionary with two entries for each unique group:
+    - `<group label>` the sampled value of the observation metric for each bootstrap iteration, only for this group. This will have level `nboots`.
+    - `<group label>_sem` the estimatd standard error of the mean of the observation metric for this group. 
+
 You can perform statistical testing with:
 
 > import hierarchical_bootstrap.stats as stats   
-> bootstraps = stats.compute_stats(bootstraps)
+> stats_df = stats.compute_stats(bootstraps)
+
+`stats_df` is a dataframe with one row for each hypothesis test performed. Each row has the following columns:
+ - name, which is the combination of the two groups compared
+ - p, the fraction of bootstrap iterations where group1 > group2
+ - nboots, the number of bootstrap iterations used in the test (inherited from `bootstraps`) 
+
 
 
